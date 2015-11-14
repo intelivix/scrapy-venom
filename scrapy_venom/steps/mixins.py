@@ -5,6 +5,9 @@ from scrapy_venom import exceptions
 from scrapy_venom import utils
 
 
+__all__ = ['HttpMixin', 'ExtractItemMixin']
+
+
 class HttpMixin(object):
 
     ALLOWED_METHODS = ('GET', 'POST')

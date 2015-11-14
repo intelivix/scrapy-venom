@@ -6,6 +6,9 @@ from scrapy_venom import exceptions
 from scrapy_venom.steps import mixins
 
 
+__all__ = ['StepBase', 'InitStep']
+
+
 class StepBase(object):
     """
     Base class for all steps. Implements the base functions

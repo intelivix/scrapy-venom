@@ -7,6 +7,9 @@ from scrapy_venom.steps import mixins
 from scrapy_venom.steps import base
 
 
+__all__ = ['SearchStep', 'ItemStep']
+
+
 class SearchStep(mixins.HttpMixin, base.StepBase):
 
     search_url = ''
