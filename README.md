@@ -1,6 +1,8 @@
 # Scrapy-Venom
 
 
+**Warning: we do not recomend using this package yet, we're working on it. Please, wait for more features.**
+
 Overview
 ----------
 
@@ -9,6 +11,8 @@ Overview
 Scrapy-venom comes to fill the lack of libraries about these activities. It brings a new convention for the implementation of spiders, a more "dry" (Don't Repeat Yourself) and feature based way to program.
 
 Venom classes are intended to solve simple scraping problems, once at time. It comes with a series of featured mixins which we call "steps". A set of "steps" build the spider "flow". They make the scraping programming more easy to read and understand.
+
+The documentation is available at: http://scrapy-venom.readthedocs.org/en/latest/
 
 Requirements
 ----------------
