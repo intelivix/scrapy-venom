@@ -10,6 +10,16 @@ __all__ = ['SpiderFlow']
 
 
 class SpiderFlow(spiders.Spider):
+    """
+    Base class for all spiders flows. Implements the base functions
+    and enforces the concept of steps
+
+    Attributes:
+
+        name            The name of the spider
+        initial_step    The initial class that will process the response
+
+    """
 
     name = ''
     initial_step = None
@@ -19,10 +29,10 @@ class SpiderFlow(spiders.Spider):
         if not self.name:
             self.name = utils.slugify_name(self.__class__.__name__)
 
-        if not issubclass(self.initial_step, steps.StepBase):
+        if not issubclass(self.initial_step, steps.InitStep):
             raise exceptions.ArgumentError(
                 (u'The initial_step attribute must'
-                 ' be a subclass of scrapy_venom.steps.BaseStep'))
+                 ' be a subclass of scrapy_venom.steps.InitStep'))
 
         super(SpiderFlow, self).__init__(*args, **kwargs)
 
@@ -35,6 +45,19 @@ class SpiderFlow(spiders.Spider):
 
 
 class SpiderSearchFlow(SpiderFlow):
+    """
+    Spider flow that implements the search_step at first step
+
+    Attributes:
+
+        initial_step    Step that will process the response from the search
+        http_method     HTTP Method to request the url
+        search_url      The url that will receive the request
+        payload         The Query to be searched (QueryStrings or FormData)
+        cookies         The Cookies of the request
+        headers         The headers of the request
+
+    """
 
     initial_step = None
     http_method = 'GET'

@@ -5,6 +5,10 @@ import urllib
 
 
 def slugify_name(string):
+    """
+    Transforms a string in CammelCase in cammel_case
+
+    """
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', string)
     return re.sub('([a-z0-9])([A-Z])', r'\1-\2', s1).lower()
 
@@ -24,6 +28,7 @@ def make_url(payload, url):
 def get_hidden_fields(selector):
     """
     Get the hidden inputs in the response
+
     """
     hidden_fields = {}
     for item in selector.xpath('descendant::input[@type="hidden"]'):

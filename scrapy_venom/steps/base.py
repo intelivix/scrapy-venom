@@ -76,6 +76,15 @@ class StepBase(object):
 
 
 class InitStep(mixins.HttpMixin, StepBase):
+    """
+    Parent step required for spiders with basic flow
+    such as SpiderFlow.
+
+    Attributes:
+
+        initial_url     URL that will be requested
+
+    """
 
     initial_url = ''
 

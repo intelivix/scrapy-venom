@@ -10,7 +10,7 @@ setup(
     package_data={
         'scrapy_venom': [],
     },
-    version='0.1',
+    version='0.1.1',
     description='Generic classes to deal with data scraping using Scrapy',
     author='Tiago Lira',
     author_email='tiago@intelivix.com',

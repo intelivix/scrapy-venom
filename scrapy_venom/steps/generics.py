@@ -11,6 +11,15 @@ __all__ = ['SearchStep', 'ItemStep']
 
 
 class SearchStep(mixins.HttpMixin, base.StepBase):
+    """
+    Generic helper for search. After search,
+    the default is pass the response to the next step
+
+    Attributes:
+
+        search_url     URL that will be requested
+
+    """
 
     search_url = ''
 
@@ -33,6 +42,23 @@ class SearchStep(mixins.HttpMixin, base.StepBase):
 
 
 class ItemStep(mixins.ExtractItemMixin, base.StepBase):
+    """
+    Generic helper for extract items from response
+    You must implementate the method get_selector()
+    which returns a Selector or SelectorList and
+    every item will be processed in the methods
+
+    extract_item()
+    clean_item()
+    build_item()
+
+    from the mixins.ExtractItemMixin
+
+    Attributes:
+
+        item_class  scrapy.Item that wll be extracted from response
+
+    """
 
     item_class = None
 

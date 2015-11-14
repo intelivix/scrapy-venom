@@ -9,6 +9,18 @@ __all__ = ['HttpMixin', 'ExtractItemMixin']
 
 
 class HttpMixin(object):
+    """
+    Mixin that allows request GET and POST through the method dispatch()
+
+    Attributes:
+
+        http_method     The method HTTP that will be requested by dispatch
+        request_url     URL that will be requested
+        payload         The Query to be requested (QueryStrings or FormData)
+        cookies         The Cookies of the request
+        headers         The headers of the request
+
+    """
 
     ALLOWED_METHODS = ('GET', 'POST')
     http_method = 'GET'
@@ -54,9 +66,13 @@ class HttpMixin(object):
 
 
 class ExtractItemMixin(object):
+    """
+    Mixin to clean, extract and build items from response
 
-    def extract_item(self, selector):
-        return selector.extract()
+    """
+
+    def extract_item(self, response):
+        return response.extract()
 
     def clean_item(self, extraction):
         return extraction or {}
@@ -64,7 +80,7 @@ class ExtractItemMixin(object):
     def build_item(self, cleaned_data):
         return self.item_class(**cleaned_data)
 
-    def process_item(self, selector):
-        extraction = self.extract_item(selector)
+    def process_item(self, response):
+        extraction = self.extract_item(response)
         cleaned_data = self.clean_item(extraction)
         return self.build_item(cleaned_data or {})
