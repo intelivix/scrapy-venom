@@ -63,15 +63,15 @@ class ItemStep(mixins.ExtractItemMixin, base.StepBase):
     item_class = None
 
     def __init__(self, *args, **kwargs):
-        try:
-            assert self.item_class, (
+        super(ItemStep, self).__init__(*args, **kwargs)
+
+        if not self.item_class:
+            raise exceptions.ArgumentError(
                 u'You must define an item_class attribute')
 
-            assert issubclass(self.item_class, scrapy_item.Item), (
+        if not issubclass(self.item_class, scrapy_item.Item):
+            raise exceptions.ArgumentError(
                 u'The item_class must be a subclass of scrapy.Item')
-
-        except AssertionError as e:
-            raise exceptions.ArgumentError(e.message)
 
     def crawl(self, response=None, **context):
         result = self.get_selector(response, **context)

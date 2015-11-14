@@ -65,7 +65,7 @@ class StepBase(object):
 
         """
         raise NotImplementedError(
-            u'É necessário implementar o método crawl')
+            u'You must implement the method crawl()')
 
     def get_next_step(self):
         return self.next_step.as_func(spider=self.spider, parent_step=self)
