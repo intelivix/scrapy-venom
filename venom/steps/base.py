@@ -2,8 +2,8 @@
 
 import types
 import functools
-from scrapy_venom import exceptions
-from scrapy_venom.steps import mixins
+from venom import exceptions
+from venom.steps import mixins
 
 
 __all__ = ['StepBase', 'InitStep']
@@ -33,32 +33,32 @@ class StepBase(object):
         Transforms the entire class into a function
 
         """
-        def step(response=None, **context):
+        def step(*args, **kwargs):
             self = cls(spider=spider, parent_step=parent_step, **step_fields)
 
             if hasattr(self, '_init_request'):
                 yield self._init_request()
             else:
-                for result in self._crawl(response=response, **context):
+                for result in self._crawl(*args, **kwargs) or []:
                     yield result
 
         functools.update_wrapper(step, cls, updated=())
         return step
 
-    def _crawl(self, response=None, **context):
+    def _crawl(self, *args, **kwargs):
         """
         Method for execute before the main implementation
         (like "pre_crawl")
 
         """
-        for result in self.crawl(response=response, **context) or []:
+        for result in self.crawl(*args, **kwargs) or []:
             if isinstance(result, types.GeneratorType):
                 for item in result:
                     yield item
             else:
                 yield result
 
-    def crawl(self, response=None):
+    def crawl(self, *args, **kwargs):
         """
         The main method of the spider. This needs to be implemented
         by childs classes.
@@ -70,9 +70,9 @@ class StepBase(object):
     def get_next_step(self):
         return self.next_step.as_func(spider=self.spider, parent_step=self)
 
-    def call_next_step(self, **context):
+    def call_next_step(self, *args, **kwargs):
         next_step = self.get_next_step()
-        return next_step(**context)
+        return next_step(*args, **kwargs)
 
 
 class InitStep(mixins.HttpMixin, StepBase):

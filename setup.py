@@ -8,7 +8,7 @@ setup(
     name='scrapy-venom',
     packages=find_packages(),
     package_data={
-        'scrapy_venom': [],
+        'venom': [],
     },
     version='0.1.1',
     description='Generic classes to deal with data scraping using Scrapy',

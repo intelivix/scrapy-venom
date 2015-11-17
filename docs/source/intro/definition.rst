@@ -19,10 +19,10 @@ Basically, the concept is a sequence of steps. The spider defines the initial st
 
 **GoogleSpiderFlow**
 
-The goal of this spider is make a query to google and get all links from the result.
+The goal of this spider is make a query to google and collect all links from the result.
 
 * **STEP 1:** Make a GET request: https://www.google.com.br?q=keyword
-* **STEP 2:** Get all links from the response.
+* **STEP 2:** Collect all links from the response.
 
 
 .. code-block:: python

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from scrapy import http
-from scrapy_venom import exceptions
-from scrapy_venom import utils
+from venom import exceptions
+from venom import utils
 
 
 __all__ = ['HttpMixin', 'ExtractItemMixin']

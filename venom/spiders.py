@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from scrapy import spiders
-from scrapy_venom import steps
-from scrapy_venom import utils
-from scrapy_venom import exceptions
+from venom import steps
+from venom import utils
+from venom import exceptions
 
 
 __all__ = ['SpiderFlow']
@@ -65,6 +65,9 @@ class SpiderSearchFlow(SpiderFlow):
     payload = {}
     cookies = {}
     headers = {}
+
+    def __init__(self, *args, **kwargs):
+        pass
 
     def start_requests(self):
         search_step = self.get_search_step()

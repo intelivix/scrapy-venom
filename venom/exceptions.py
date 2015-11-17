@@ -2,6 +2,9 @@
 
 
 class Error(Exception):
+    """
+    Errors base
+    """
 
     def __str__(self):
         return u'\n\033[91m>> {}\033[0m\n'.format(self.message)
