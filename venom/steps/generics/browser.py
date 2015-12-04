@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import tldextract
-from pyvirtualdisplay.smartdisplay import SmartDisplay
 from selenium import webdriver
 from selenium.webdriver.support import ui
 from selenium.webdriver.support import expected_conditions as ec
@@ -9,6 +8,91 @@ from selenium.webdriver.common import by
 
 from venom import steps
 from venom import utils
+
+
+class Element(object):
+
+    def __init__(self, driver, xpath=None, element=None):
+        self._driver = driver
+
+        if not xpath and not element:
+            raise Exception(u'You must pass an element or xpath')
+
+        if xpath:
+            self._element = driver.find_element_by_xpath(xpath)
+        else:
+            self._element = element
+
+    def find(self, xpath, many=False):
+        """
+        Find an element or many elements in the html by xpath
+
+        """
+
+        element = self._element
+        cls = self.__class__
+
+        if many:
+            return [
+                cls(self._driver, element=x) for x in
+                element.find_elements_by_xpath(xpath)]
+        else:
+            return cls(self._driver, xpath=xpath)
+
+    def write(self, value, verify_read_only=False, clear_before=True):
+        """
+        Write method, generally used in <input type="text">
+
+        Attributes:
+
+            value               The value that will fill the input
+            ...
+            verify_read_only    If is True, verify if it's readonly before fill
+            clear_before        If is True, will clear the input before fill
+
+        """
+        element = self._element
+
+        # Handling unicode errors
+        if isinstance(value, str):
+            value = value.decode('utf-8')
+
+        if not verify_read_only:
+            if clear_before:
+                element.clear()
+            element.send_keys(value)
+            return True
+
+        elif not element.get_attribute('readonly'):
+            if clear_before:
+                element.clear()
+            element.send_keys(value)
+            return True
+
+        return False
+
+    def select(self, value, by_value=True):
+
+        element = self._element
+
+        if by_value:
+
+            # Iterate's the <option> tags and compare the value attribute
+            for option in element.find_elements_by_tag_name('option'):
+                if utils.compare_strings(option.get_attribute('value'), value):
+                    option.click()
+                    return option.get_attribute('value')
+        else:
+            # Iterate's the <option> tags and compare the inner text
+            for option in element.find_elements_by_tag_name('option'):
+                if utils.compare_strings(option.text, value):
+                    option.click()
+                    return option.get_attribute('value')
+
+        return False
+
+    def attr(self, key):
+        return self._element.get_attribute(key)
 
 
 class Popup(object):
@@ -50,8 +134,8 @@ class Browser(object):
 
     """
 
-    def __init__(self):
-        self._driver = webdriver.Firefox()
+    def __init__(self, webdriver):
+        self._driver = webdriver()
 
     def get(self, url):
         """
@@ -60,16 +144,20 @@ class Browser(object):
         """
         return self._driver.get(url)
 
-    def get_element(self, xpath, many=False):
+    def find(self, xpath, many=False):
         """
         Find an element or many elements in the html by xpath
 
         """
 
+        driver = self._driver
+
         if many:
-            return self._driver.find_elements_by_xpath(xpath)
+            return [
+                Element(element=x) for x in
+                driver.find_elements_by_xpath(xpath)]
         else:
-            return self._driver.find_element_by_xpath(xpath)
+            return Element(self._driver, xpath=xpath)
 
     def set_cookies(self, cookies, domain=None):
         """
@@ -115,19 +203,9 @@ class Browser(object):
         if xpath:
             element = self.get_element(xpath)
 
-        if not verify_read_only:
-            if clear_before:
-                element.clear()
-            element.send_keys(value)
-            return True
-
-        elif not element.get_attribute('readonly'):
-            if clear_before:
-                element.clear()
-            element.send_keys(value)
-            return True
-
-        return False
+        return element.write(
+            value, verify_read_only=verify_read_only,
+            clear_before=clear_before)
 
     def select(self, value, xpath=None, element=None, by_value=True):
         """
@@ -143,30 +221,17 @@ class Browser(object):
         if xpath:
             element = self.get_element(xpath)
 
-        if by_value:
-
-            # Iterate's the <option> tags and compare the value attribute
-            for option in element.find_elements_by_tag_name('option'):
-                if utils.compare_strings(option.get_attribute('value'), value):
-                    option.click()
-                    return option.get_attribute('value')
-        else:
-            # Iterate's the <option> tags and compare the inner text
-            for option in element.find_elements_by_tag_name('option'):
-                if utils.compare_strings(option.text, value):
-                    option.click()
-                    return option.get_attribute('value')
-
-        return False
+        return element.select(value, by_value=by_value)
 
     def wait_for_element(self, xpath, timeout=10):
         """
         Wait's until the element appear in the html
 
         """
-        return ui.WebDriverWait(self._driver, 10).until(
+        el = ui.WebDriverWait(self._driver, 10).until(
             ec.presence_of_element_located((by.By.XPATH, xpath))
         )
+        return Element(self._driver, element=el)
 
     def open_popup(self, element):
         """
@@ -205,12 +270,13 @@ class BrowserManager(object):
 
     """
 
-    def __init__(self, driver=None):
+    def __init__(self, driver=None, webdriver=webdriver.Firefox):
         self._driver = driver
+        self._webdriver = webdriver
 
     def __enter__(self):
         if not self._driver:
-            self._driver = Browser()
+            self._driver = Browser(self._webdriver)
         return self._driver
 
     def __exit__(self, type, value, traceback):
@@ -223,22 +289,11 @@ class BrowserStep(steps.StepBase):
 
     """
 
-    use_smartdisplay = False
-
-    def start_browser(self, browser, response):
-        browser.get(response.url)
+    webdriver = webdriver.Firefox
 
     def _crawl(self, response, **kwargs):
         parent_crawl = super(BrowserStep, self)._crawl
 
-        if self.use_smartdisplay:
-            with SmartDisplay(visible=0, bgcolor='black'):
-                with BrowserManager() as browser:
-                    self.start_browser(browser, response)
-                    for item in parent_crawl(browser):
-                        yield item
-        else:
-            with BrowserManager() as browser:
-                self.start_browser(browser, response)
-                for item in parent_crawl(browser):
-                    yield item
+        with BrowserManager(webdriver=self.webdriver) as browser:
+            for item in parent_crawl(browser):
+                yield item
