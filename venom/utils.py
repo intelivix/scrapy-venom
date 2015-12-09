@@ -19,8 +19,10 @@ def make_url(payload, url):
     Makes the url with the payload (QueryString)
 
     """
+
     if not payload:
         return url
+
     payload = urllib.urlencode(payload)
     url = url + '?' + payload
     return url
@@ -34,8 +36,10 @@ def get_hidden_fields(selector):
     hidden_fields = {}
     for item in selector.xpath('descendant::input[@type="hidden"]'):
         key = item.xpath('./@name').extract()[0]
-        value = item.xpath('./@value').extract()[0]
-        hidden_fields.update({key: value})
+        value = item.xpath('./@value').extract()
+        if not value:
+            value = ['']
+        hidden_fields.update({key: value[0]})
     return hidden_fields
 
 
@@ -50,7 +54,7 @@ def to_unicode(string):
     return string
 
 
-def compare_strings(str1, str2):
+def compare_str(str1, str2):
     str1 = to_unicode(str1).upper().strip()
     str2 = to_unicode(str2).upper().strip()
     if normalize_ascii(str1) == normalize_ascii(str2):

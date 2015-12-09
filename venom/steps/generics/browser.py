@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import time
 import tldextract
 from selenium import webdriver
 from selenium.webdriver.support import ui
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common import by
-
+from selenium.common import exceptions
+from venom.decorators import handle_exceptions
 from venom import steps
 from venom import utils
 
@@ -22,6 +24,10 @@ class Element(object):
             self._element = driver.find_element_by_xpath(xpath)
         else:
             self._element = element
+
+    @property
+    def text(self):
+        return self._element.text
 
     def find(self, xpath, many=False):
         """
@@ -79,42 +85,60 @@ class Element(object):
 
             # Iterate's the <option> tags and compare the value attribute
             for option in element.find_elements_by_tag_name('option'):
-                if utils.compare_strings(option.get_attribute('value'), value):
+                if utils.compare_str(option.get_attribute('value'), value):
                     option.click()
                     return option.get_attribute('value')
         else:
             # Iterate's the <option> tags and compare the inner text
             for option in element.find_elements_by_tag_name('option'):
-                if utils.compare_strings(option.text, value):
+                if utils.compare_str(option.text, value):
                     option.click()
                     return option.get_attribute('value')
 
         return False
 
+    def click(self):
+        return self._element.click()
+
     def attr(self, key):
+        return self.get_attribute(key)
+
+    def get_attribute(self, key):
         return self._element.get_attribute(key)
 
 
 class Popup(object):
 
-    def __init__(self, browser, element):
+    def __init__(self, browser, element, timeout):
         self.browser = browser
+        self._current = None
         self._element = element
+        self._timeout = timeout
 
     def __enter__(self):
-        self._main = self.current_window
+        old_windows = self.window_handles
+        elapsed = 0
+        self._previous = self.current_window
         self._element.click()
-        popup = [x for x in self.window_handles if x != self._main][0]
-        self.switch_to_window(popup)
+
+        while not self._current:
+            current = [x for x in self.window_handles if x not in old_windows]
+            if current:
+                self._current = current[0]
+            else:
+                time.sleep(2)
+                elapsed += 2
+                if elapsed > self._timeout:
+                    raise exceptions.TimeoutException()
+
+        self.switch_to_window(self._current)
         return self.browser
 
     def __exit__(self, type, value, traceback):
-        popups = [x for x in self.window_handles if x != self._main]
-        for popup in popups:
-            self.switch_to_window(popup)
+        if self._current in self.window_handles:
+            self.switch_to_window(self._current)
             self.browser._driver.close()
-
-        self.switch_to_window(self._main)
+        self.switch_to_window(self._previous)
 
     @property
     def current_window(self):
@@ -151,11 +175,10 @@ class Browser(object):
         """
 
         driver = self._driver
-
         if many:
+            elements = driver.find_elements_by_xpath(xpath)
             return [
-                Element(element=x) for x in
-                driver.find_elements_by_xpath(xpath)]
+                Element(self._driver, element=x) for x in elements]
         else:
             return Element(self._driver, xpath=xpath)
 
@@ -201,7 +224,7 @@ class Browser(object):
             value = value.decode('utf-8')
 
         if xpath:
-            element = self.get_element(xpath)
+            element = self.find(xpath)
 
         return element.write(
             value, verify_read_only=verify_read_only,
@@ -219,7 +242,7 @@ class Browser(object):
 
         """
         if xpath:
-            element = self.get_element(xpath)
+            element = self.find(xpath)
 
         return element.select(value, by_value=by_value)
 
@@ -233,7 +256,7 @@ class Browser(object):
         )
         return Element(self._driver, element=el)
 
-    def open_popup(self, element):
+    def open_popup(self, xpath=None, element=None, timeout=10):
         """
         Open a poup by clicking in the element
 
@@ -242,7 +265,15 @@ class Browser(object):
                 # do stuff
 
         """
-        return Popup(self, element)
+
+        if xpath:
+            element = self.find(xpath)
+
+        return Popup(self, element, timeout=timeout)
+
+    def click(self, xpath):
+        element = self.find(xpath)
+        return element.click()
 
     def quit(self):
         """
@@ -289,11 +320,17 @@ class BrowserStep(steps.StepBase):
 
     """
 
+    initial_url = None
     webdriver = webdriver.Firefox
 
+    @handle_exceptions
     def _crawl(self, response, **kwargs):
         parent_crawl = super(BrowserStep, self)._crawl
 
         with BrowserManager(webdriver=self.webdriver) as browser:
-            for item in parent_crawl(browser):
+
+            if self.initial_url:
+                browser.get(self.initial_url)
+
+            for item in parent_crawl(browser) or []:
                 yield item

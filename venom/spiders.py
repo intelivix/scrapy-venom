@@ -4,6 +4,7 @@ from scrapy import spiders
 from venom import steps
 from venom import utils
 from venom import exceptions
+from venom.decorators import handle_exceptions
 
 
 __all__ = ['SpiderFlow']
@@ -18,30 +19,94 @@ class SpiderFlow(spiders.Spider):
 
         name            The name of the spider
         initial_step    The initial class that will process the response
+        required_args   The required args to excecute the spider
+        optional_args   The optional args to excecute the spider
 
     """
 
     name = ''
     initial_step = None
+    required_args = []
+    optional_args = []
 
     def __init__(self, *args, **kwargs):
-
-        if not self.name:
-            self.name = utils.slugify_name(self.__class__.__name__)
-
         if not issubclass(self.initial_step, steps.InitStep):
             raise exceptions.ArgumentError(
                 (u'The initial_step attribute must'
-                 ' be a subclass of scrapy_venom.steps.InitStep'))
+                 ' be a subclass of venom.steps.InitStep'))
 
-        super(SpiderFlow, self).__init__(*args, **kwargs)
+        self._save_required_args(kwargs)
+        self._save_optional_args(kwargs)
 
+    def _save_required_args(self, kwargs):
+        for key in self.get_required_args():
+            if key not in kwargs:
+                raise exceptions.ArgumentError(
+                    u'You must provide a argument named {}'.format(key))
+            setattr(self, key, kwargs.pop(key))
+
+    def _save_optional_args(self, kwargs):
+        for key in self.get_optional_args():
+            setattr(self, key, kwargs.pop(key, ''))
+
+    @handle_exceptions
     def start_requests(self):
         initial_step = self.get_initial_step()
-        return initial_step()
+        for item in initial_step():
+            yield item
+
+    def get_optional_args(self):
+        return self.optional_args or []
+
+    def get_required_args(self):
+        return self.required_args or []
 
     def get_initial_step(self):
-        return self.initial_step.as_func(spider=self)
+
+        if not self.initial_step:
+            return None
+
+        context = self.get_initial_step_kwargs()
+        return self.initial_step.as_func(**context)
+
+    def get_initial_step_kwargs(self):
+        return {
+            'spider': self,
+            'next_step': None,
+        }
+
+
+class SpiderAuthFlow(SpiderFlow):
+
+    auth_step = None
+    form_action_url = ''
+
+    def __init__(self, *args, **kwargs):
+        self._save_required_args(kwargs)
+        self._save_optional_args(kwargs)
+
+    @handle_exceptions
+    def start_requests(self):
+        auth_step = self.get_auth_step()
+        for item in auth_step():
+            yield item
+
+    def get_auth_step(self):
+        context = self.get_auth_step_kwargs()
+        context.update({'spider': self})
+        auth_base_cls = (self.auth_step, steps.InitStep)
+        auth_cls = type(
+            'InitLoginStep', auth_base_cls, {
+                'form_action_url': self.form_action_url,
+                'initial_url': self.form_action_url,
+            })
+
+        return auth_cls.as_func(**context)
+
+    def get_auth_step_kwargs(self):
+        return {
+            'next_step': self.get_initial_step(),
+        }
 
 
 class SpiderSearchFlow(SpiderFlow):
@@ -69,6 +134,7 @@ class SpiderSearchFlow(SpiderFlow):
     def __init__(self, *args, **kwargs):
         pass
 
+    @handle_exceptions
     def start_requests(self):
         search_step = self.get_search_step()
         return search_step()
