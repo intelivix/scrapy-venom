@@ -78,8 +78,12 @@ class StepBase(object):
         return self.next_step.as_func(
             spider=self.spider, parent_step=self)
 
-    def call_next_step(self, *args, **kwargs):
-        next_step = self.get_next_step()
+    def call_next_step(self, next_step_cls=None, *args, **kwargs):
+        if next_step_cls:
+            next_step = next_step_cls.as_func(
+                spider=self.spider, parent_step=self)
+        else:
+            next_step = self.get_next_step()
         return next_step(*args, **kwargs)
 
     def throw_error(self, exc, exc_type, exc_value, exc_traceback):
