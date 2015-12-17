@@ -107,6 +107,23 @@ class Element(object):
         return self._element.get_attribute(key)
 
 
+class Table(list):
+
+    def __init__(self, driver, xpath=None, element=None):
+        super(Table, self).__init__()
+        element = Element(driver, xpath=xpath, element=element)
+        self.headers = [x.text for x in element.find('.//th', many=True)]
+        import ipdb; ipdb.set_trace()
+        for row in element.find('.//tr', many=True):
+            columns = row.find('.//td', many=True)
+
+            if len(columns) == len(self.headers):
+                row = {}
+                for idx, column in enumerate(columns):
+                    row[self.headers[idx]] = column.text
+                self.append(row)
+
+
 class Popup(object):
 
     def __init__(self, browser, element, timeout):

@@ -126,3 +126,7 @@ class InitStep(mixins.HttpMixin, StepBase):
     def get_request_url(self):
         # Overriding the mixins.HttpMixin method
         return self.initial_url
+
+    def crawl(self, *args, **kwargs):
+        if self.next_step:
+            self.call_next_step(*args, **kwargs)

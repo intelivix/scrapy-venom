@@ -4,6 +4,7 @@ from scrapy import spiders
 from venom import steps
 from venom import utils
 from venom import exceptions
+from venom.steps import generics
 from venom.decorators import handle_exceptions
 
 
@@ -126,7 +127,7 @@ class SpiderSearchFlow(SpiderFlow):
 
     initial_step = None
     http_method = 'GET'
-    search_url = ''
+    search_step = generics.SearchStep
     payload = {}
     cookies = {}
     headers = {}
@@ -140,14 +141,15 @@ class SpiderSearchFlow(SpiderFlow):
         return search_step()
 
     def get_search_step(self):
-        context = self.get_step_context()
+        context = self.get_search_step_kwargs()
         context.update({'spider': self})
-        search_bases_cls = (steps.InitStep,)
-        search_attr = {'crawl': steps.StepBase.call_next_step}
-        search_cls = type('InitSearchStep', search_bases_cls, search_attr)
+        search_base_cls = (self.initial_step, steps.InitStep)
+        search_cls = type(
+            'InitSearchStep', search_base_cls, context)
+
         return search_cls.as_func(**context)
 
-    def get_step_context(self):
+    def get_search_step_kwargs(self):
         return {
             'cookies': self.get_cookies(),
             'headers': self.get_headers(),

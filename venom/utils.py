@@ -61,3 +61,15 @@ def compare_str(str1, str2):
         return True
     else:
         return False
+
+
+class _AttributeDict(dict):
+
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            raise AttributeError(key)
+
+    def __setattr__(self, key, value):
+        self[key] = value
