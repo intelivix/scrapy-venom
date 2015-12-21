@@ -176,7 +176,7 @@ class Browser(object):
     """
 
     def __init__(self, webdriver):
-        self._driver = webdriver()
+        self._driver = webdriver
 
     def get(self, url):
         """
@@ -344,10 +344,13 @@ class BrowserStep(steps.StepBase):
     def _crawl(self, response, **kwargs):
         parent_crawl = super(BrowserStep, self)._crawl
 
-        with BrowserManager(webdriver=self.webdriver) as browser:
+        with BrowserManager(webdriver=self.get_webdriver()) as browser:
 
             if self.initial_url:
                 browser.get(self.initial_url)
 
             for item in parent_crawl(browser) or []:
                 yield item
+
+    def get_webdriver(self, *args, **kwargs):
+        return self.webdriver()
