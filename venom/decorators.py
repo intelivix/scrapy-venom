@@ -37,6 +37,6 @@ def handle_exceptions(fn):
                     self.spider.venom_error = (
                         exc_type, exc_value, exc_traceback)
 
-            raise exceptions.CloseSpider(e)
+            raise exceptions.CloseSpider(reason=str(e))
 
     return wrapper
