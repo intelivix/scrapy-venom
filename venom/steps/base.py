@@ -88,7 +88,7 @@ class StepBase(object):
         return next_step(*args, **kwargs)
 
     def throw_error(self, exc, exc_type, exc_value, exc_traceback):
-        self.spider.venom_error = (exc_type, exc_value, exc_traceback)
+        self.spider.error = (exc_type, exc_value, exc_traceback)
         raise exc
 
     def response_to_file(self, path, response):
@@ -127,6 +127,10 @@ class InitStep(mixins.HttpMixin, StepBase):
         # Overriding the mixins.HttpMixin method
         return self.initial_url
 
+    def _crawl(self, *args, **kwargs):
+        for item in self.crawl(*args, **kwargs) or []:
+            yield item
+
     def crawl(self, *args, **kwargs):
         if self.next_step:
-            self.call_next_step(*args, **kwargs)
+            return self.call_next_step(*args, **kwargs)

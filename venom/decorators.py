@@ -28,13 +28,13 @@ def handle_exceptions(fn):
         except Exception as e:
             exc_type, exc_value, exc_traceback = sys.exc_info()
             if issubclass(self.__class__, SpiderFlow):
-                if not hasattr(self, 'venom_error'):
-                    self.venom_error = (
+                if not hasattr(self, 'error'):
+                    self.error = (
                         exc_type, exc_value, exc_traceback)
 
             elif issubclass(self.__class__, StepBase):
-                if not hasattr(self.spider, 'venom_error'):
-                    self.spider.venom_error = (
+                if not hasattr(self.spider, 'error'):
+                    self.spider.error = (
                         exc_type, exc_value, exc_traceback)
 
             if hasattr(e, 'msg'):

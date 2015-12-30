@@ -33,9 +33,9 @@ class MiddlewareBase(object):
 class HandleErrorsMiddleware(MiddlewareBase):
 
     def spider_closed(self, spider):
-        if hasattr(spider, 'venom_error'):
+        if hasattr(spider, 'error'):
             traceback.print_exception(
-                limit=10, file=sys.stdout, *spider.venom_error)
+                limit=10, file=sys.stdout, *spider.error)
 
 
 class SignalHandler(object):
