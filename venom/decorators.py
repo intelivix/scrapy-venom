@@ -3,6 +3,7 @@
 import sys
 import types
 import functools
+import traceback
 from scrapy import exceptions
 
 
@@ -18,12 +19,10 @@ def handle_exceptions(fn):
         try:
             result = fn(self, *arguments, **kwargs)
             if isinstance(result, types.GeneratorType):
-                result_list = []
                 for item in result:
-                    result_list.append(item)
-                return result_list
+                    yield item
             else:
-                return result
+                yield result
 
         except Exception as e:
             exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -46,6 +45,8 @@ def handle_exceptions(fn):
             else:
                 error = 'error'
 
+            traceback.print_exception(
+                exc_type, exc_value, exc_traceback, limit=10, file=sys.stdout)
             raise exceptions.CloseSpider(reason=error)
 
     return wrapper

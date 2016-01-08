@@ -3,10 +3,9 @@
 from venom import exceptions
 from venom.steps import mixins
 from venom.steps import base
-from venom.decorators import handle_exceptions
 
 
-__all__ = ['SearchStep']
+__all__ = ['SearchStep', 'SearchFlowStep']
 
 
 class SearchStep(mixins.HttpMixin, base.StepBase):
@@ -21,10 +20,10 @@ class SearchStep(mixins.HttpMixin, base.StepBase):
     """
 
     search_url = ''
+    next_step = None
 
     def __init__(self, *args, **kwargs):
         super(SearchStep, self).__init__(*args, **kwargs)
-
         if not self.get_request_url():
             raise exceptions.ArgumentError(
                 u'You must define an search_url or get_request_url()')
@@ -32,10 +31,12 @@ class SearchStep(mixins.HttpMixin, base.StepBase):
     def get_request_url(self):
         return self.search_url
 
-    @handle_exceptions
-    def _crawl(self, *args, **kwargs):
-        parent_crawl = super(SearchStep, self)._crawl
-        yield self.dispatch(callback=parent_crawl)
-
     def crawl(self, response, *args, **kwargs):
-        yield self.call_next_step(response=response)
+        yield self.call_step(
+            self.next_step, response=response)
+
+
+class SearchFlowStep(SearchStep):
+
+    def _init_request(self):
+        return self.dispatch(callback=self._crawl)

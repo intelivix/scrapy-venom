@@ -127,13 +127,15 @@ class SpiderSearchFlow(SpiderFlow):
 
     initial_step = None
     http_method = 'GET'
-    search_step = generics.SearchStep
+    search_step = generics.SearchFlowStep
+    search_url = ''
     payload = {}
     cookies = {}
     headers = {}
 
     def __init__(self, *args, **kwargs):
-        pass
+        self._save_required_args(kwargs)
+        self._save_optional_args(kwargs)
 
     @handle_exceptions
     def start_requests(self):
@@ -143,11 +145,7 @@ class SpiderSearchFlow(SpiderFlow):
     def get_search_step(self):
         context = self.get_search_step_kwargs()
         context.update({'spider': self})
-        search_base_cls = (self.initial_step, steps.InitStep)
-        search_cls = type(
-            'InitSearchStep', search_base_cls, context)
-
-        return search_cls.as_func(**context)
+        return self.search_step.as_func(**context)
 
     def get_search_step_kwargs(self):
         return {
@@ -155,7 +153,7 @@ class SpiderSearchFlow(SpiderFlow):
             'headers': self.get_headers(),
             'payload': self.get_payload(),
             'next_step': self.initial_step,
-            'initial_url': self.get_search_url(self.http_method)
+            'search_url': self.get_search_url(self.http_method)
         }
 
     def get_cookies(self):
@@ -170,8 +168,8 @@ class SpiderSearchFlow(SpiderFlow):
     def get_search_url(self, method):
 
         if method == 'POST':
-            return self.search_url
+            return self.search_url or self.search_step.search_url
 
         return utils.make_url(
             payload=self.payload,
-            url=self.search_url)
+            url=self.search_url or self.search_step.search_url)

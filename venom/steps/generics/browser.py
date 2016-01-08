@@ -107,13 +107,56 @@ class Element(object):
         return self._element.get_attribute(key)
 
 
+class Table(object):
+
+    def __init__(self, *args, **kwargs):
+        # element = Element(driver, xpath=xpath, element=element)
+        self._headers = ['Nome', 'Sobrenome']  # self._get_headers(element)
+        self._rows = []  # self._get_rows(element)
+
+    def __getitem__(self, key):
+        return [x[key] for x in self._rows if key in x]
+
+    def _get_headers(self, element):
+        headers = [x.text for x in element.find('.//th', many=True)]
+        if not headers:
+            headers = [x.text for x in element.find('.//td')]
+        return headers
+
+    def _get_rows(self, element):
+        for row in element.find('.//tr', many=True):
+            columns = row.find('.//td', many=True)
+            if len(columns) == len(self.headers):
+                self.append(*[x.text for x in columns])
+
+    @property
+    def rows(self):
+        return self._rows
+
+    @property
+    def headers(self):
+        return self._headers
+
+    def append(self, *args):
+        args = iter(args)
+        self._rows.append({key: next(args) for key in self.headers})
+
+    def column(self, key):
+        return self.__getitem__(key)
+
+    def row(self, idx):
+        return self._rows[idx]
+
+    def filter(self, **kwargs):
+        return filter(lambda x: [x for x in kwargs.iteritems()], sequence)
+
+
 class Table(list):
 
     def __init__(self, driver, xpath=None, element=None):
         super(Table, self).__init__()
         element = Element(driver, xpath=xpath, element=element)
         self.headers = [x.text for x in element.find('.//th', many=True)]
-        import ipdb; ipdb.set_trace()
         for row in element.find('.//tr', many=True):
             columns = row.find('.//td', many=True)
 

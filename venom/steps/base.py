@@ -18,7 +18,6 @@ class StepBase(object):
     """
     next_step = None
 
-    @handle_exceptions
     def __init__(self, spider, *args, **kwargs):
         self.spider = spider
         self.parent_step = kwargs.pop('parent_step', None)
@@ -86,6 +85,10 @@ class StepBase(object):
         else:
             next_step = self.get_next_step()
         return next_step(*args, **kwargs)
+
+    def call_step(self, cls, **kwargs):
+        next_step = cls.as_func(spider=self.spider, parent_step=self)
+        return next_step(**kwargs)
 
     def throw_error(self, exc, exc_type, exc_value, exc_traceback):
         self.spider.error = (exc_type, exc_value, exc_traceback)

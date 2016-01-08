@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import sys
+import logging
+import traceback
+from scrapy import exceptions
+
+
+logger = logging.getLogger(__name__)
+
 
 class Error(Exception):
     """
