@@ -268,7 +268,7 @@ class Browser(object):
         Wait's until the element appear in the html
 
         """
-        el = ui.WebDriverWait(self._driver, 10).until(
+        el = ui.WebDriverWait(self._driver, timeout).until(
             ec.presence_of_element_located((by.By.XPATH, xpath))
         )
         return Element(self._driver, element=el)
