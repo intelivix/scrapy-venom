@@ -344,7 +344,11 @@ class BrowserStep(steps.StepBase):
     def _crawl(self, response, **kwargs):
         parent_crawl = super(BrowserStep, self)._crawl
 
+        if not hasattr(self.spider, 'browsers'):
+            self.spider.browsers = []
+
         with BrowserManager(webdriver=self.get_webdriver()) as browser:
+            self.spider.browsers.append(browser)
 
             if self.initial_url:
                 browser.get(self.initial_url)
