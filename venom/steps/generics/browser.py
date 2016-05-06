@@ -113,7 +113,6 @@ class Table(list):
         super(Table, self).__init__()
         element = Element(driver, xpath=xpath, element=element)
         self.headers = [x.text for x in element.find('.//th', many=True)]
-        import ipdb; ipdb.set_trace()
         for row in element.find('.//tr', many=True):
             columns = row.find('.//td', many=True)
 
@@ -358,3 +357,34 @@ class BrowserStep(steps.StepBase):
 
     def get_webdriver(self, *args, **kwargs):
         return self.webdriver()
+
+
+class TableFrame(dict):
+
+    def __init__(self, element=None):
+        self.headers = [x.text for x in element.find('.//th', many=True)]
+        headers = self.headers
+        for row in element.find('.//tr', many=True):
+            columns = row.find('.//td', many=True)
+
+            if len(columns) == len(headers):
+                for idx, column in enumerate(columns):
+                    if headers[idx] in self:
+                        self[headers[idx]]\
+                            .append(u'{}'.format(column))
+                    else:
+                        self[headers[idx]] = []
+                        self[headers[idx]]\
+                            .append(u'{}'.format(column))
+
+    def get_line(self, num):
+        row = []
+        for key, value in enumerate(self):
+            row.append(self[value][num])
+        return row
+
+    def get_line_key(self, num):
+        row = []
+        for key, value in enumerate(self):
+            row.append({value: self[value][num]})
+        return row
