@@ -371,11 +371,11 @@ class TableFrame(dict):
                 for idx, column in enumerate(columns):
                     if headers[idx] in self:
                         self[headers[idx]]\
-                            .append(u'{}'.format(column))
+                            .append(column)
                     else:
                         self[headers[idx]] = []
                         self[headers[idx]]\
-                            .append(u'{}'.format(column))
+                            .append(column)
 
     def get_line(self, num):
         row = []
@@ -388,3 +388,4 @@ class TableFrame(dict):
         for key, value in enumerate(self):
             row.append({value: self[value][num]})
         return row
+
