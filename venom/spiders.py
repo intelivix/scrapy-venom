@@ -133,7 +133,8 @@ class SpiderSearchFlow(SpiderFlow):
     headers = {}
 
     def __init__(self, *args, **kwargs):
-        pass
+        self._save_required_args(kwargs)
+        self._save_optional_args(kwargs)
 
     @handle_exceptions
     def start_requests(self):

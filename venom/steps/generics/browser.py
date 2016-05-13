@@ -43,7 +43,8 @@ class Element(object):
                 cls(self._driver, element=x) for x in
                 element.find_elements_by_xpath(xpath)]
         else:
-            return cls(self._driver, xpath=xpath)
+            el = element.find_element_by_xpath(xpath)
+            return cls(self._driver, element=el)
 
     def write(self, value, verify_read_only=False, clear_before=True):
         """
