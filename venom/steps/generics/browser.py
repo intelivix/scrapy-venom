@@ -82,19 +82,14 @@ class Element(object):
 
         element = self._element
 
-        if by_value:
-
-            # Iterate's the <option> tags and compare the value attribute
-            for option in element.find_elements_by_tag_name('option'):
-                if utils.compare_str(option.get_attribute('value'), value):
-                    option.click()
-                    return option.get_attribute('value')
-        else:
-            # Iterate's the <option> tags and compare the inner text
-            for option in element.find_elements_by_tag_name('option'):
-                if utils.compare_str(option.text, value):
-                    option.click()
-                    return option.get_attribute('value')
+        for option in element.find_elements_by_tag_name('option'):
+            value_browser = option.get_attribute('value')
+            # Iterate's the <option> tags and compare the
+            # value attribute or inner text
+            comparison_value = value_browser if by_value else option.text
+            if utils.compare_str(comparison_value, value):
+                option.click()
+                return value_browser
 
         return False
 
@@ -389,4 +384,3 @@ class TableFrame(dict):
         for key, value in enumerate(self):
             row.append({value: self[value][num]})
         return row
-
