@@ -15,7 +15,9 @@ def simple_step(fn=None, timeout=5):
         return wrapper_factory(fn, timeout)
 
     def wrapper_factory(fn, timeout):
-        @tools.timeout(timeout)
+        error_message = 'The step "%s" took too long to finish.' % fn.__name__
+
+        @tools.timeout(timeout, error_message=error_message)
         @functools.wraps(fn)
         def wrapper(response):
             spider = response.meta['spider']
@@ -23,7 +25,6 @@ def simple_step(fn=None, timeout=5):
 
             for item in fn(**kwargs) or []:
                 is_function = isinstance(item, types.FunctionType)
-
                 if isinstance(item, FormRequest) or isinstance(item, Request):
                     meta = item.meta.copy()
                     meta.update({'spider': spider})
