@@ -6,30 +6,37 @@ import functools
 from scrapy.http import FormRequest
 from scrapy.http import Request
 
-from venom.tools import is_generator
-from venom.tools import resolve_gen
-from venom.tools import timeout
+from venom import tools
 
 
-def simple_step(fn):
+def simple_step(fn=None, timeout=5):
 
-    @functools.wraps(fn)
-    def wrapper(response):
-        spider = response.meta['spider']
-        kwargs = {
-            'spider': spider,
-            'response': response,
-        }
-        decorator = timeout(getattr(spider.timeout, 5))
-        func = decorator(fn)
-        for item in func(**kwargs) or []:
-            if isinstance(item, FormRequest) or isinstance(item, Request):
-                meta = item.meta.copy()
-                meta.update({'spider': spider})
-                yield item.replace(meta=meta)
-            if is_generator(item) or isinstance(item, types.FunctionType):
-                for item in resolve_gen(item, response=response):
+    def decorator(fn):
+        return wrapper_factory(fn, timeout)
+
+    def wrapper_factory(fn, timeout):
+        @tools.timeout(timeout)
+        @functools.wraps(fn)
+        def wrapper(response):
+            spider = response.meta['spider']
+            kwargs = {'spider': spider, 'response': response}
+
+            for item in fn(**kwargs) or []:
+                is_function = isinstance(item, types.FunctionType)
+
+                if isinstance(item, FormRequest) or isinstance(item, Request):
+                    meta = item.meta.copy()
+                    meta.update({'spider': spider})
+                    yield item.replace(meta=meta)
+
+                elif tools.is_generator(item) or is_function:
+                    for item in tools.resolve_gen(item, response=response):
+                        yield item
+                else:
                     yield item
-            else:
-                yield item
-    return wrapper
+        return wrapper
+
+    if fn:
+        return wrapper_factory(fn, timeout)
+    else:
+        return decorator
