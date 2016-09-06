@@ -18,13 +18,12 @@ def timeout(minutes=10, error_message=os.strerror(errno.ETIME), callback=None):
         def wrapper(*args, **kwargs):
             timeout_handler = functools.partial(_handler, *args, **kwargs)
             signal.signal(signal.SIGALRM, timeout_handler)
-            seconds = int(minutes * 60)
-            signal.alarm(seconds)
+            signal.alarm(minutes * 60)
             try:
-                for x in func(*args, **kwargs):
-                    yield x
+                result = func(*args, **kwargs)
             finally:
                 signal.alarm(0)
+            return result
 
         return functools.wraps(func)(wrapper)
     return decorator
