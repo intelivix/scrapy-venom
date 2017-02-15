@@ -37,11 +37,12 @@ class Spider(spiders.Spider):
     def _save_arguments(self, kwargs, required=True):
         required_args = self.get_required_args()
         optional_args = self.get_optional_args()
-        cls_arguments = required_args + optional_args
+        cls_arguments = required_args + optional_args + ['collection_name']
         for key in cls_arguments:
             if key in required_args and key not in kwargs:
                 raise Exception(u'You must provide a argument named %s' % key)
-            setattr(self, key, kwargs.get(key, None))
+            default = 'processos' if key == 'collection_name' else None
+            setattr(self, key, kwargs.get(key, default))
 
     def get_required_args(self):
         return self.required_args
