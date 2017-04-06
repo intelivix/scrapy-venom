@@ -26,6 +26,7 @@ class Spider(spiders.Spider):
 
     name = ''
     initial_step = None
+    retries = 0
     required_args = []
     optional_args = []
     __metaclass__ = MetaSpider
@@ -37,11 +38,16 @@ class Spider(spiders.Spider):
     def _save_arguments(self, kwargs, required=True):
         required_args = self.get_required_args()
         optional_args = self.get_optional_args()
-        cls_arguments = required_args + optional_args
+        monitor_args = self.get_monitor_args()
+        cls_arguments = required_args + optional_args + monitor_args
         for key in cls_arguments:
             if key in required_args and key not in kwargs:
                 raise Exception(u'You must provide a argument named %s' % key)
             setattr(self, key, kwargs.get(key, None))
+        self.payload = kwargs
+
+    def get_monitor_args(self):
+        return ['job_id', 'retries']
 
     def get_required_args(self):
         return self.required_args
@@ -72,12 +78,8 @@ class TribunaisSpider(Spider):
     default_collection_name = 'processos'
 
     def _save_arguments(self, kwargs, required=True):
-        required_args = self.get_required_args()
-        optional_args = self.get_optional_args()
-        default_args = ['collection_name', 'job_id', 'retries']
-        cls_arguments = required_args + optional_args + default_args
-        for key in cls_arguments:
-            if key in required_args and key not in kwargs:
-                raise Exception(u'You must provide a argument named %s' % key)
+        super(TribunaisSpider, self)._save_arguments(kwargs, required=required)
+        tribunais_args = ['collection_name']
+        for key in tribunais_args:
             default = self.default_collection_name if key == 'collection_name' else None  # noqa
             setattr(self, key, kwargs.get(key, default))
