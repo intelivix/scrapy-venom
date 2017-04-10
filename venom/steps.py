@@ -21,7 +21,7 @@ def simple_step(fn):
             if isinstance(item, FormRequest) or isinstance(item, Request):
                 meta = item.meta.copy()
                 meta.update({'spider': kwargs['spider']})
-                yield item.replace(meta=meta)
+                item = item.replace(meta=meta)
             if is_generator(item) or isinstance(item, types.FunctionType):
                 for item in resolve_gen(item, response=response):
                     yield item
