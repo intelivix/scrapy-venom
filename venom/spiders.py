@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import json
+
 from scrapy import spiders
 from scrapy.utils.project import get_project_settings
+from constants import DEFAULT_COVERAGE, ESTADOS_BRASIL
 
 from venom import registry
 
@@ -10,6 +13,41 @@ __all__ = ['Spider']
 
 
 settings = get_project_settings()
+
+
+class SpiderCoverage():
+    self.default_coverage = DEFAULT_COVERAGE
+
+    def check_default_coverage(self, coverage):
+        return self.default_coverage == coverage
+
+    def check_required_args(self, ):
+        for arg in ['name', 'estado', 'fonte']:
+            if not hasattr(cls, arg):
+                return False
+        return True
+
+    def check_coverage(self):
+        default_fields = DEFAULT_COVERAGE.keys()
+        coverage = getattr(cls, 'coverage', {})
+
+        coverage_fields = coverage.keys()
+        if (ESTADOS_BRASIL in coverage_fields or
+                'default' in coverage_fields):
+            for key, value in coverage:
+                sub_coverage_fields = coverage_fields
+                if not set(default_fields).issubset(value):
+                    return False
+            return True
+
+        elif set(default_fields).issubset(coverage_fields):
+            return True
+        return False
+
+    def output_json(self):
+        # TODO: adicionar argumentos dentro do coverage antes de 
+        # TODO: exportar o json
+        return json.dumps(getattr(cls, 'coverage', {}), ensure_ascii=False)
 
 
 class MetaSpider(type):
@@ -22,7 +60,7 @@ class MetaSpider(type):
             registry.spiders.register(cls)
 
 
-class Spider(spiders.Spider):
+class Spider(spiders.Spider, SpiderCoverage):
 
     name = ''
     initial_step = None
