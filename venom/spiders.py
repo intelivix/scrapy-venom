@@ -18,10 +18,11 @@ settings = get_project_settings()
 class SpiderCoverage():
     default_coverage = DEFAULT_COVERAGE
 
-    def check_default_coverage(self, coverage):
+    def check_default_coverage(self):
+        coverage = getattr(cls, 'coverage', {})
         return self.default_coverage == coverage
 
-    def check_required_args(self, ):
+    def check_required_args(self):
         for arg in ['name', 'estado', 'fonte']:
             if not hasattr(cls, arg):
                 return False
@@ -76,6 +77,13 @@ class Spider(spiders.Spider, SpiderCoverage):
     def __init__(self, *args, **kwargs):
         self._save_arguments(kwargs)
         self._save_arguments(kwargs)
+        if not self.check_coverage():
+            raise Exception(u'Spider coverage arguments are equal to default')
+        if not self.check_required_args():
+            raise Exception(
+                u'This spider does not have all required arguments')
+        if not self.check_coverage():
+            raise Exception(u'Error on spider coverage arguments')
 
     def _save_arguments(self, kwargs, required=True):
         required_args = self.get_required_args()
