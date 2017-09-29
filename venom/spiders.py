@@ -16,7 +16,7 @@ settings = get_project_settings()
 
 
 class SpiderCoverage():
-    self.default_coverage = DEFAULT_COVERAGE
+    default_coverage = DEFAULT_COVERAGE
 
     def check_default_coverage(self, coverage):
         return self.default_coverage == coverage
@@ -45,9 +45,13 @@ class SpiderCoverage():
         return False
 
     def output_json(self):
-        # TODO: adicionar argumentos dentro do coverage antes de 
-        # TODO: exportar o json
-        return json.dumps(getattr(cls, 'coverage', {}), ensure_ascii=False)
+        output = {}
+        for arg in ['name', 'estado', 'fonte']:
+            arg_dict = {arg: getattr(cls, arg, {})}
+            output.update(arg_dict)
+        output.update(getattr(cls, 'coverage', {}))
+
+        return json.dumps(output, ensure_ascii=False)
 
 
 class MetaSpider(type):
