@@ -15,29 +15,30 @@ __all__ = ['Spider']
 settings = get_project_settings()
 
 
-class SpiderCoverage():
+class SpiderCoverageMixin(object):
     default_coverage = DEFAULT_COVERAGE
 
-    def check_default_coverage(self):
-        coverage = getattr(self, 'coverage', {})
-        return self.default_coverage == coverage
+    @classmethod
+    def check_default_coverage(cls):
+        coverage = getattr(cls, 'coverage', {})
+        return cls.default_coverage != coverage
 
-    def check_required_args(self):
+    @classmethod
+    def check_required_args(cls):
         for arg in ['name', 'estado', 'fonte']:
-            if not hasattr(self, arg):
+            if not hasattr(cls, arg):
                 return False
         return True
 
-    def check_coverage(self):
-        import ipdb; ipdb.set_trace()
+    @classmethod
+    def check_coverage(cls):
         default_fields = DEFAULT_COVERAGE.keys()
-        coverage = getattr(self, 'coverage', {})
+        coverage = getattr(cls, 'coverage', {})
 
         coverage_fields = coverage.keys()
         if (ESTADOS_BRASIL in coverage_fields or
                 'default' in coverage_fields):
             for key, value in coverage:
-                sub_coverage_fields = coverage_fields
                 if not set(default_fields).issubset(value):
                     return False
             return True
@@ -46,12 +47,23 @@ class SpiderCoverage():
             return True
         return False
 
-    def output_json(self):
+    @classmethod
+    def test_spider(cls):
+        if not cls.check_default_coverage():
+            raise Exception(u'Spider coverage arguments are equal to default')
+        if not cls.check_required_args():
+            raise Exception(
+                u'This spider does not have all required arguments')
+        if not cls.check_coverage():
+            raise Exception(u'Error on spider coverage arguments')
+
+    @classmethod
+    def output_json(cls):
         output = {}
         for arg in ['name', 'estado', 'fonte']:
-            arg_dict = {arg: getattr(self, arg, {})}
+            arg_dict = {arg: getattr(cls, arg, {})}
             output.update(arg_dict)
-        output.update(getattr(self, 'coverage', {}))
+        output.update(getattr(cls, 'coverage', {}))
 
         return json.dumps(output, ensure_ascii=False)
 
@@ -66,7 +78,7 @@ class MetaSpider(type):
             registry.spiders.register(cls)
 
 
-class Spider(spiders.Spider, SpiderCoverage):
+class Spider(spiders.Spider, SpiderCoverageMixin):
 
     name = ''
     initial_step = None
@@ -78,13 +90,7 @@ class Spider(spiders.Spider, SpiderCoverage):
     def __init__(self, *args, **kwargs):
         self._save_arguments(kwargs)
         self._save_arguments(kwargs)
-        if not self.check_coverage():
-            raise Exception(u'Spider coverage arguments are equal to default')
-        if not self.check_required_args():
-            raise Exception(
-                u'This spider does not have all required arguments')
-        if not self.check_coverage():
-            raise Exception(u'Error on spider coverage arguments')
+        self.test_spider()
 
     def _save_arguments(self, kwargs, required=True):
         required_args = self.get_required_args()
