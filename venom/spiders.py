@@ -19,18 +19,19 @@ class SpiderCoverage():
     default_coverage = DEFAULT_COVERAGE
 
     def check_default_coverage(self):
-        coverage = getattr(cls, 'coverage', {})
+        coverage = getattr(self, 'coverage', {})
         return self.default_coverage == coverage
 
     def check_required_args(self):
         for arg in ['name', 'estado', 'fonte']:
-            if not hasattr(cls, arg):
+            if not hasattr(self, arg):
                 return False
         return True
 
     def check_coverage(self):
+        import ipdb; ipdb.set_trace()
         default_fields = DEFAULT_COVERAGE.keys()
-        coverage = getattr(cls, 'coverage', {})
+        coverage = getattr(self, 'coverage', {})
 
         coverage_fields = coverage.keys()
         if (ESTADOS_BRASIL in coverage_fields or
@@ -48,9 +49,9 @@ class SpiderCoverage():
     def output_json(self):
         output = {}
         for arg in ['name', 'estado', 'fonte']:
-            arg_dict = {arg: getattr(cls, arg, {})}
+            arg_dict = {arg: getattr(self, arg, {})}
             output.update(arg_dict)
-        output.update(getattr(cls, 'coverage', {}))
+        output.update(getattr(self, 'coverage', {}))
 
         return json.dumps(output, ensure_ascii=False)
 
