@@ -38,7 +38,7 @@ class SpiderCoverageMixin(object):
         coverage_fields = coverage.keys()
         if (ESTADOS_BRASIL in coverage_fields or
                 'default' in coverage_fields):
-            for key, value in coverage:
+            for value in coverage.values():
                 if not set(default_fields).issubset(value):
                     return False
             return True
@@ -61,7 +61,7 @@ class SpiderCoverageMixin(object):
     def output_json(cls):
         output = {}
         for arg in ['name', 'estado', 'fonte']:
-            arg_dict = {arg: getattr(cls, arg, {})}
+            arg_dict = {arg: getattr(cls, arg, '')}
             output.update(arg_dict)
         output.update(getattr(cls, 'coverage', {}))
 
