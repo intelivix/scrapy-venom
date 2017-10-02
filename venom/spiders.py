@@ -57,13 +57,16 @@ class SpiderCoverageMixin(object):
 
     @classmethod
     def test_spider(cls):
-        if not cls.check_default_coverage():
-            raise Exception(u'Spider coverage arguments are equal to default')
-        if not cls.check_required_args():
-            raise Exception(
-                u'This spider does not have all required arguments')
-        if not cls.check_coverage():
-            raise Exception(u'Error on spider coverage arguments')
+        name = getattr(cls, 'name', '')
+        if 'extrair' not in name:
+            if not cls.check_default_coverage():
+                raise Exception(
+                    u'Spider coverage arguments are equal to default')
+            if not cls.check_required_args():
+                raise Exception(
+                    u'This spider does not have all required arguments')
+            if not cls.check_coverage():
+                raise Exception(u'Error on spider coverage arguments')
 
     @classmethod
     def output_json(cls):
