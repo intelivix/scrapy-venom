@@ -47,7 +47,7 @@ class SpiderCoverageMixin(object):
         coverage_fields = coverage.keys()
         if cls.check_multiple_coverage(coverage_fields):
             for value in coverage.values():
-                if not set(default_fields).issubset(value):
+                if not set(default_fields).issubset(value.keys()):
                     return False
             return True
 
