@@ -19,6 +19,13 @@ class SpiderCoverageMixin(object):
     default_coverage = DEFAULT_COVERAGE
 
     @classmethod
+    def check_multiple_coverage(cls, coverage_fields):
+        inter = len(set(ESTADOS_BRASIL).intersection(set(coverage_fields)))
+        if inter > 0 or 'default' in coverage_fields:
+            return True
+        return False
+
+    @classmethod
     def check_default_coverage(cls):
         coverage = getattr(cls, 'coverage', {})
         return cls.default_coverage != coverage
@@ -38,8 +45,7 @@ class SpiderCoverageMixin(object):
         coverage = getattr(cls, 'coverage', {})
 
         coverage_fields = coverage.keys()
-        if (ESTADOS_BRASIL in coverage_fields or
-                'default' in coverage_fields):
+        if cls.check_multiple_coverage(coverage_fields):
             for value in coverage.values():
                 if not set(default_fields).issubset(value):
                     return False
@@ -62,10 +68,18 @@ class SpiderCoverageMixin(object):
     @classmethod
     def output_json(cls):
         output = {}
-        for arg in ['name', 'estado', 'estados_config', 'fonte']:
+        for arg in ['name', 'estado', 'fonte']:
             arg_dict = {arg: getattr(cls, arg, '')}
             output.update(arg_dict)
-        output.update(getattr(cls, 'coverage', {}))
+        if hasattr(cls, 'estados_config'):
+            estados = [estado_dict['meta']['estado']
+                       for estado_dict in getattr(cls, 'estados_config', '')]
+            output.update({'estados': estados})
+        coverage = getattr(cls, 'coverage', {})
+        if cls.check_multiple_coverage(coverage.keys()):
+            output.update({'coverage': coverage})
+        else:
+            output.update(getattr(cls, 'coverage', {}))
 
         return json.dumps(output, ensure_ascii=False)
 
