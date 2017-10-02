@@ -25,9 +25,11 @@ class SpiderCoverageMixin(object):
 
     @classmethod
     def check_required_args(cls):
-        for arg in ['name', 'estado', 'fonte']:
+        for arg in ['name', 'fonte']:
             if not hasattr(cls, arg):
                 return False
+        if not (hasattr(cls, 'estado') or hasattr(cls, 'estados_config')):
+            return False
         return True
 
     @classmethod
@@ -60,7 +62,7 @@ class SpiderCoverageMixin(object):
     @classmethod
     def output_json(cls):
         output = {}
-        for arg in ['name', 'estado', 'fonte']:
+        for arg in ['name', 'estado', 'estados_config', 'fonte']:
             arg_dict = {arg: getattr(cls, arg, '')}
             output.update(arg_dict)
         output.update(getattr(cls, 'coverage', {}))
