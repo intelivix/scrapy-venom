@@ -35,7 +35,9 @@ class SpiderCoverageMixin(object):
         for arg in ['name', 'fonte']:
             if not hasattr(cls, arg):
                 return False
-        if not (hasattr(cls, 'estado') or hasattr(cls, 'estados_config')):
+        if not (hasattr(cls, 'estado') or
+                hasattr(cls, 'estados_config') or
+                hasattr(cls, 'estados')):
             return False
         return True
 
@@ -57,8 +59,7 @@ class SpiderCoverageMixin(object):
 
     @classmethod
     def test_spider(cls):
-        name = getattr(cls, 'name', '')
-        if 'extrair' not in name:
+        if 'extrair' not in getattr(cls, 'name', ''):
             if not cls.check_default_coverage():
                 raise Exception(
                     u'Spider coverage arguments are equal to default')
@@ -71,13 +72,22 @@ class SpiderCoverageMixin(object):
     @classmethod
     def output_json(cls):
         output = {}
-        for arg in ['name', 'estado', 'fonte']:
+        # Required Fields
+        for arg in ['name', 'fonte']:
             arg_dict = {arg: getattr(cls, arg, '')}
             output.update(arg_dict)
+
+        # Estados
         if hasattr(cls, 'estados_config'):
             estados = [estado_dict['meta']['estado']
                        for estado_dict in getattr(cls, 'estados_config', '')]
             output.update({'estados': estados})
+        elif hasattr(cls, 'estados'):
+            output.update({'estados': getattr(cls, 'estados', '')})
+        else:
+            output.update({'estado': getattr(cls, 'estado', '')})
+
+        # Coverage
         coverage = getattr(cls, 'coverage', {})
         if cls.check_multiple_coverage(coverage.keys()):
             output.update({'coverage': coverage})
