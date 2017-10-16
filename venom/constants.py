@@ -1,3 +1,6 @@
+from enums import SpiderStatus
+from enums import InstanciaStatus
+
 
 ESTADOS_BRASIL = [
     'GO', 'MT', 'MS', 'DF', 'AM', 'AC', 'RO', 'RR',
@@ -6,15 +9,15 @@ ESTADOS_BRASIL = [
     'PR', 'SC', 'RS']
 
 DEFAULT_COVERAGE = {
-    'status': 0,
+    'status': SpiderStatus.NAO_IMPLEMENTADO,
     'captcha': False,
     'arquivos': False,
-    '1-grau-fisico': 0,
-    '2-grau-fisico': 0,
-    '1-grau-eletronico': 0,
-    '2-grau-eletronico': 0,
-    'jec-1-grau-fisico': 0,
-    'jec-2-grau-fisico': 0,
-    'jec-1-grau-eletronico': 0,
-    'jec-2-grau-eletronico': 0,
+    '1-grau-fisico': InstanciaStatus.NAO_IMPLEMENTADO,
+    '2-grau-fisico': InstanciaStatus.NAO_IMPLEMENTADO,
+    '1-grau-eletronico': InstanciaStatus.NAO_IMPLEMENTADO,
+    '2-grau-eletronico': InstanciaStatus.NAO_IMPLEMENTADO,
+    'jec-1-grau-fisico': InstanciaStatus.NAO_IMPLEMENTADO,
+    'jec-2-grau-fisico': InstanciaStatus.NAO_IMPLEMENTADO,
+    'jec-1-grau-eletronico': InstanciaStatus.NAO_IMPLEMENTADO,
+    'jec-2-grau-eletronico': InstanciaStatus.NAO_IMPLEMENTADO,
 }
