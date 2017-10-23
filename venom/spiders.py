@@ -32,7 +32,7 @@ class SpiderCoverageMixin(object):
 
     @classmethod
     def check_required_args(cls):
-        for arg in ['name', 'fonte']:
+        for arg in ['name', 'fonte', 'coverage']:
             if not hasattr(cls, arg):
                 return False
         if not (hasattr(cls, 'estado') or
