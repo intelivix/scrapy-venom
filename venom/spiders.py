@@ -5,7 +5,7 @@ import json
 from scrapy import spiders
 from scrapy.utils.project import get_project_settings
 from venom import registry
-from spider_coverage import SpiderCoverageMixin
+from spidercoverage.mixins import SpiderCoverageMixin
 
 
 __all__ = ['Spider']
