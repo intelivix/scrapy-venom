@@ -16,6 +16,9 @@ setup(
     author_email='tiago@intelivix.com',
     url='https://github.com/intelivix/scrapy-venom',
     download_url='https://github.com/intelivix/scrapy-venom/tarball/0.1',
+    dependency_links=[
+        'https://github.com/intelivix/intelivix-scraping-utils.git'
+        '@coverage#egg=intelivix-scraping-utils']
     keywords=['scrapy', 'scraping', 'steps', 'flows'],
     entry_points={
         'console_scripts': [
