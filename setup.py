@@ -17,11 +17,9 @@ setup(
     url='https://github.com/intelivix/scrapy-venom',
     download_url='https://github.com/intelivix/scrapy-venom/tarball/0.1',
     dependency_links=[
-        'https://github.com/arthurmoreno/spider-coverage.git'
-        '#egg=spider-coverage'],
-    install_requires=[
-          'spidercoverage',
-      ],
+        'http://github.com/arthurmoreno/spider-coverage'
+        '#egg=spider-coverage'
+    ],
     keywords=['scrapy', 'scraping', 'steps', 'flows'],
     entry_points={
         'console_scripts': [
