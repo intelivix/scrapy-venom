@@ -19,6 +19,9 @@ setup(
     dependency_links=[
         'https://github.com/arthurmoreno/spider-coverage.git'
         '#egg=spider-coverage'],
+    install_requires=[
+          'spidercoverage',
+      ],
     keywords=['scrapy', 'scraping', 'steps', 'flows'],
     entry_points={
         'console_scripts': [
