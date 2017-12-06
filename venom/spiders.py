@@ -2,8 +2,8 @@
 
 from scrapy import spiders
 from scrapy.utils.project import get_project_settings
-
 from venom import registry
+from scrapingutils.spidercoverage.mixins import SpiderCoverageMixin
 
 
 __all__ = ['Spider']
@@ -22,7 +22,7 @@ class MetaSpider(type):
             registry.spiders.register(cls)
 
 
-class Spider(spiders.Spider):
+class Spider(spiders.Spider, SpiderCoverageMixin):
 
     name = ''
     initial_step = None
@@ -34,6 +34,7 @@ class Spider(spiders.Spider):
     def __init__(self, *args, **kwargs):
         self._save_arguments(kwargs)
         self._save_arguments(kwargs)
+        self.test_spider()
 
     def _save_arguments(self, kwargs, required=True):
         required_args = self.get_required_args()
