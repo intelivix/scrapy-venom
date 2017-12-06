@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import json
-
 from scrapy import spiders
 from scrapy.utils.project import get_project_settings
 from venom import registry
