@@ -80,7 +80,7 @@ class TribunaisSpider(Spider):
 
     def _save_arguments(self, kwargs, required=True):
         super(TribunaisSpider, self)._save_arguments(kwargs, required=required)
-        tribunais_args = ['collection_name', 'termo_cliente']
+        tribunais_args = ['collection_name', 'termo_cliente', 'intelivix_id']
         for key in tribunais_args:
             default = self.default_collection_name if key == 'collection_name' else None  # noqa
             setattr(self, key, kwargs.get(key, default))
