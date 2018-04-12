@@ -31,14 +31,9 @@ def simple_step(fn):
 
 
 def loader(fn):
-    @functools.wraps(fn)
-    def wrapper(response):
-        kwargs = {
-            'spider': response.meta['spider'],
-            'response': response,
-        }
-        loader = response.meta.get('loader', '')
+    def wrapper(*args, **kwargs):
+        loader = kwargs['response'].meta.get('loader', '')
         assert loader is not ''
-
-        return fn(loader=loader, **kwargs)
+        kwargs.update({'loader': loader})
+        return fn(*args, **kwargs)
     return wrapper
