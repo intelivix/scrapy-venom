@@ -28,3 +28,12 @@ def simple_step(fn):
             else:
                 yield item
     return wrapper
+
+
+def loader(fn):
+    def wrapper(*args, **kwargs):
+        loader = kwargs['response'].meta.get('loader', '')
+        assert loader is not ''
+        kwargs.update({'loader': loader})
+        return fn(*args, **kwargs)
+    return wrapper
