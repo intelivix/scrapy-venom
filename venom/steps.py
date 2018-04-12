@@ -28,3 +28,17 @@ def simple_step(fn):
             else:
                 yield item
     return wrapper
+
+
+def loader(fn):
+    @functools.wraps(fn)
+    def wrapper(response):
+        kwargs = {
+            'spider': response.meta['spider'],
+            'response': response,
+        }
+        loader = response.meta.get('loader', '')
+        assert loader is not ''
+
+        return fn(loader=loader, **kwargs)
+    return wrapper
